@@ -3,18 +3,13 @@ module fsm_TX (
   input rst_n,
   input en,
   input tick_uart,
-  input [2:0] count,
-  output reg LDEN,
-  output reg SHEN,
-  output reg rstcount,
-  output reg countEN,
-  output reg TX_D,
   output busy
 
 );
   
 reg [1:0] state;
 reg [1:0] next;
+reg countflag;
 parameter IDLE = 2'd0;
 parameter START = 2'd1;
 parameter SHIFT = 2'd2;
@@ -46,9 +41,20 @@ always @* begin
         next = START; 
     end
     SHIFT: begin
-      
+      if(tick_uart == 1'b1 && countflag == 1'b1)
+        next = STOP;
+      else
+        next = SHIFT;  
     end
-    default: 
+    STOP: begin
+      if (tick_uart == 1'b1) begin
+        next = IDLE;
+      end
+      else 
+        next = STOP;
+    end
+    default:
+      next = IDLE; 
   endcase
   
 end
