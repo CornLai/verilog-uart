@@ -9,7 +9,7 @@ module fsm_TX (
   
 reg [1:0] state;
 reg [1:0] next;
-reg countflag;
+wire countflag;
 parameter IDLE = 2'd0;
 parameter START = 2'd1;
 parameter SHIFT = 2'd2;
@@ -58,4 +58,25 @@ always @* begin
   endcase
   
 end
+//counter
+reg [2:0] counter;
+always @(posedge clk_50M) begin
+  if (!rst_n) begin
+    counter <= 1'b0;
+  end
+  else begin
+    if (state == SHIFT) begin
+      if (counter == 3'd7) begin
+        counter <= 1'b0;
+      end
+      else begin
+        counter <= counter + 1'b1;
+      end
+    end
+    else begin
+      counter <= 1'b0;
+    end
+  end
+end
+assign countflag = (counter == 3'd7);
 endmodule
